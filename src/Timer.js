@@ -4,45 +4,47 @@ class Timer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      status: false,
       pause: false,
-      timeValue: this.props.time,
+      time: props.time,
       reminder: ""
     };
     this.interval = null;
   }
 
   startTimer() {
-    if (this.state.pause || this.state.timeValue) {
+    if (this.state.pause || (this.state.time !== 0 && !this.state.status)) {
       this.setState({
+        status: true,
         pause: false
       });
       this.interval = setInterval(() => {
-        if (this.state.timeValue === 0) {
+        if (this.state.time === 0) {
           if (this.props.onEnd) this.endTimer();
           clearInterval(this.interval);
           return;
         }
-        this.setState({ timeValue: this.state.timeValue - 1 });
+        this.setState({ time: this.state.time - 1 });
       }, 1000);
     }
   }
 
   endTimer() {
-    alert(this.reminder);
+    alert(this.state.reminder);
     this.props.onEnd();
     this.setState({
-      timeValue: this.props.time,
+      status: false,
+      time: this.props.time,
       reminder: ""
     });
   }
 
   stopTimer() {
-    if (this.interval) {
-      clearInterval(this.interval);
-    }
+    if (this.interval) clearInterval(this.interval);
     this.setState({
+      status: false,
       pause: false,
-      timeValue: ""
+      time: 0
     });
   }
 
@@ -50,23 +52,23 @@ class Timer extends React.Component {
     if (this.interval) {
       clearInterval(this.interval);
       this.setState({
+        status: false,
         pause: true
       });
     }
   }
 
   resetTimer() {
-    if (this.interval) {
-      clearInterval(this.interval);
-      this.setState({
-        pause: false,
-        timeValue: this.props.time
-      });
-    }
+    if (this.interval) clearInterval(this.interval);
+    this.setState({
+      status: false,
+      pause: false,
+      time: this.props.time
+    });
   }
 
   handleTime(e) {
-    this.setState({ timeValue: e.target.value });
+    this.setState({ time: e.target.value });
   }
 
   handleReminder(e) {
@@ -83,7 +85,7 @@ class Timer extends React.Component {
           pattern="^\d+$"
           title="Invalid value, time can't be negative"
           onChange={e => this.handleTime(e)}
-          value={this.state.timeValue}
+          value={this.state.time}
         />
         <input
           type="text"
